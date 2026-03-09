@@ -1,5 +1,6 @@
 namespace InsaneChat.CLI.Commands;
 
+[Command("exit", "Exits the application.")]
 public class ExitCommand : ICommand
 {
     public string Name => "exit";

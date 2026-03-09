@@ -1,4 +1,3 @@
-using System.Reflection;
 using InsaneChat.CLI;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,13 +9,13 @@ public static class CommandExtensions
     {
         services.AddSingleton<CommandManager>();
 
-        var commandTypes = Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && typeof(ICommand).IsAssignableFrom(t));
-
-        foreach (var commandType in commandTypes)
+        var commandTypes = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(a => a.GetTypes())
+            .Where(t => typeof(ICommand).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+            .ToList();
+        foreach (var type in commandTypes)
         {
-            services.AddTransient(typeof(ICommand), commandType);
+            services.AddTransient(type);
         }
 
         return services;

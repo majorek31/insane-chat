@@ -7,8 +7,9 @@ var serviceProvider = new ServiceCollection()
     .BuildServiceProvider();
 
 var commandManager = serviceProvider.GetRequiredService<CommandManager>();
-var commands = serviceProvider.GetServices<ICommand>();
-commandManager.SetCommands(commands);
+
+
+Console.WriteLine("Welcome to InsaneChat CLI! Type '/help' for a list of commands.");
 
 while (true)
 {

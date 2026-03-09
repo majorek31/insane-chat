@@ -1,19 +1,15 @@
 namespace InsaneChat.CLI.Commands;
 
+[Command("help", "Displays this help message.")]
 public class HelpCommand(CommandManager commandManager) : ICommand
 {
-    public string Name => "help";
-
-    public string Description => "Displays a list of available commands.";
-
     public Task ExecuteAsync()
     {
         Console.WriteLine("Available commands:");
-        foreach (var command in commandManager.GetCommands())
+        foreach (var cmd in commandManager.GetCommandInfos())
         {
-            Console.WriteLine($"  {command.Name} - {command.Description}");
+            Console.WriteLine($"   /{cmd.Name} - {cmd.Description}");
         }
-
         return Task.CompletedTask;
     }
 }
