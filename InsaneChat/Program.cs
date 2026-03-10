@@ -1,16 +1,27 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using InsaneChat.Extensions;
 using InsaneChat.CLI;
+using Microsoft.Extensions.Configuration;
+using InsaneChat.AI;
+
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
+
 
 var serviceProvider = new ServiceCollection()
+    .AddSingleton<IConfiguration>(configuration)
     .AddCommands()
+    .AddCoreAI()
     .BuildServiceProvider();
 
 var commandManager = serviceProvider.GetRequiredService<CommandManager>();
 
-
 Console.WriteLine("Welcome to InsaneChat CLI! Type '/help' for a list of commands.");
 
+var chatSession = serviceProvider.GetRequiredService<ChatSession>();
 while (true)
 {
     Console.Write("> ");
@@ -23,5 +34,6 @@ while (true)
         await commandManager.ExecuteCommandAsync(input);
         continue;
     }
-
+    var response = await chatSession.SendMessageAsync(input);
+    Console.WriteLine(response);
 }
