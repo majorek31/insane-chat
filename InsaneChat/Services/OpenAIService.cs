@@ -1,4 +1,5 @@
 using System.ClientModel;
+using InsaneChat.AI.Tools;
 using OpenAI;
 using OpenAI.Chat;
 
@@ -15,17 +16,22 @@ public class OpenAIService
             Endpoint = new Uri(baseUrl ?? "https://api.openai.com")
         });
     }
-
-    public async Task<ChatCompletion> CompleteChatAsync(string model, IEnumerable<ChatMessage> messages, int maxTokens = 1024, float temperature = 0.7f)
+    public async Task<ChatCompletion> CompleteChatAsync(string model, IEnumerable<ChatMessage> messages, IEnumerable<ChatTool> chatTools, int maxTokens = 1024, float temperature = 0.7f)
     {
         var chat = _client.GetChatClient(model);
+        var options = new ChatCompletionOptions
+        {
+            MaxOutputTokenCount = maxTokens,
+            Temperature = temperature,
+            Tools = { }
+        };
+        foreach (var tool in chatTools)
+        {
+            options.Tools.Add(tool);
+        }
         var response = await chat.CompleteChatAsync(
             messages: messages,
-            options: new ChatCompletionOptions
-            {
-                MaxOutputTokenCount = maxTokens,
-                Temperature = temperature
-            }
+            options: options
         );
         return response.Value;
     }
