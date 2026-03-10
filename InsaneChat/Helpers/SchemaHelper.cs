@@ -11,7 +11,7 @@ public static class SchemaHelper
     }
     """);
 
-    public static BinaryData CreateSchema<T>()
+    public static BinaryData CreateSchema(Type type)
     {
         var options = new SystemTextJsonSchemaGeneratorSettings
         {
@@ -21,7 +21,11 @@ public static class SchemaHelper
         };
 
         var generator = new JsonSchemaGenerator(options);
-        var schema = generator.Generate(typeof(T));
+        var schema = generator.Generate(type);
         return BinaryData.FromString(schema.ToJson());
+    }
+    public static BinaryData CreateSchema<T>()
+    {
+        return CreateSchema(typeof(T));
     }
 }
