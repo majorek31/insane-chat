@@ -3,10 +3,13 @@ using InsaneChat.Extensions;
 using InsaneChat.CLI;
 using Microsoft.Extensions.Configuration;
 using InsaneChat.AI;
+using InsaneChat.AI.Tools.Providers;
+using InsaneChat.AI.Tools;
 
+Console.WriteLine(Directory.GetCurrentDirectory());
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true)
+    .AddJsonFile("/workspaces/dotnet-postgres/InsaneChat/appsettings.json", optional: true)
     .AddEnvironmentVariables()
     .Build();
 
@@ -18,6 +21,9 @@ var serviceProvider = new ServiceCollection()
     .BuildServiceProvider();
 
 var commandManager = serviceProvider.GetRequiredService<CommandManager>();
+
+var toolManager = serviceProvider.GetRequiredService<ToolManager>();
+await toolManager.LoadTools();
 
 Console.WriteLine("Welcome to InsaneChat CLI! Type '/help' for a list of commands.");
 

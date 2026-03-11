@@ -1,6 +1,7 @@
 using System.Reflection;
 using InsaneChat.AI;
 using InsaneChat.AI.Tools;
+using InsaneChat.AI.Tools.Providers;
 using InsaneChat.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,9 @@ public static class CoreAIExtensions
         {
             services.AddTransient(toolType);
         }
+
+        // Register tool providers
+        services.AddSingleton<IToolProvider, LocalToolProvider>();
 
         return services;
     }

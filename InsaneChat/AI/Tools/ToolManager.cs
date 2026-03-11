@@ -7,47 +7,38 @@ namespace InsaneChat.AI.Tools;
 
 public class ToolManager
 {
-    private readonly IServiceProvider _serviceProvier;
-    private readonly Dictionary<string, ToolInfo> _tools = new();
+    private readonly IEnumerable<IToolProvider> _toolProviders;
+    private readonly List<ToolInfo> _tools = new();
 
-    public IEnumerable<ToolInfo> Tools => _tools.Values;
+    public IEnumerable<ToolInfo> Tools => _tools;
 
     public IEnumerable<ChatTool> ChatTools => Tools.Select(t => ChatTool.CreateFunctionTool(t.Name, t.Description, t.ParameterSchema, true));
 
-    public ToolManager(IServiceProvider provider)
+    public ToolManager(IEnumerable<IToolProvider> toolProviders)
     {
-        _serviceProvier = provider;
+        _toolProviders = toolProviders;
+    }
 
-        var toolTypes = Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && typeof(ITool).IsAssignableFrom(t));
-
-        foreach (var toolType in toolTypes)
+    public async Task LoadTools()
+    {
+        foreach (var provider in _toolProviders)
         {
-            var attr = toolType.GetCustomAttribute<ToolAttribute>();
-            if (attr == null)
-            {
-                continue;
-            }
-            var schema = attr.ParameterType is null
-                ? SchemaHelper.EmptyToolParameters
-                :
-                SchemaHelper.CreateSchema(attr.ParameterType);
-
-            var toolInfo = new ToolInfo(attr.Name, attr.Description, schema, toolType);
-
-            _tools[toolInfo.Name] = toolInfo;
+            _tools.AddRange(await provider.GetToolInfosAsync());
         }
     }
 
 
     public async Task<string> ExecuteToolAsync(string name, BinaryData parameters)
     {
-        if (!_tools.TryGetValue(name, out var toolInfo))
+        foreach (var provider in _toolProviders)
         {
-            return "Couldn't not find tool";
+            var providerTools = await provider.GetToolInfosAsync();
+
+            if (Tools.Any(t => t.Name == name))
+            {
+                return await provider.ExecuteToolAsync(name, parameters);
+            }
         }
-        var tool = (ITool)_serviceProvier.GetRequiredService(toolInfo.ToolType);
-        return await tool.ExecuteAsync(parameters);
+        throw new Exception($"Tool: {name} not found");
     }
 }
