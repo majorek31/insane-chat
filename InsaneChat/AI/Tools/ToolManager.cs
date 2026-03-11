@@ -34,7 +34,7 @@ public class ToolManager
         {
             var providerTools = await provider.GetToolInfosAsync();
 
-            if (Tools.Any(t => t.Name == name))
+            if (providerTools.Any(t => t.Name == name))
             {
                 return await provider.ExecuteToolAsync(name, parameters);
             }

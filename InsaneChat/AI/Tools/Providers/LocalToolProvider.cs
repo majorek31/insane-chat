@@ -7,7 +7,7 @@ namespace InsaneChat.AI.Tools.Providers;
 public class LocalToolProvider : IToolProvider
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, Type> _tools;
+    private readonly Dictionary<string, (ToolInfo info, Type type)> _tools = new();
     private readonly List<ToolInfo> _toolInfos = new();
 
     public LocalToolProvider(IServiceProvider provider)
@@ -26,16 +26,15 @@ public class LocalToolProvider : IToolProvider
             {
                 continue;
             }
-
-            _toolInfos.Add(new ToolInfo(
+            var info = new ToolInfo(
                 attr.Name,
                 attr.Description,
-                attr.ParameterType is not null ? SchemaHelper.CreateSchema(attr.ParameterType) : SchemaHelper.EmptyToolParameters,
-                type
-            ));
+                attr.ParameterType is not null ? SchemaHelper.CreateSchema(attr.ParameterType) : SchemaHelper.EmptyToolParameters
+            );
+            _toolInfos.Add(info);
+            _tools[attr.Name] = (info, type);
         }
 
-        _tools = _toolInfos.ToDictionary(x => x.Name, x => x.ToolType);
     }
 
     public Task<IReadOnlyList<ToolInfo>> GetToolInfosAsync() => Task.FromResult<IReadOnlyList<ToolInfo>>(_toolInfos);
@@ -46,7 +45,7 @@ public class LocalToolProvider : IToolProvider
         {
             throw new Exception($"Tool {name} was not found!");
         }
-        var tool = (ITool)_serviceProvider.GetRequiredService(toolType);
+        var tool = (ITool)_serviceProvider.GetRequiredService(toolType.type);
         return await tool.ExecuteAsync(parameters);
     }
 }

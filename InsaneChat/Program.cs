@@ -3,8 +3,10 @@ using InsaneChat.Extensions;
 using InsaneChat.CLI;
 using Microsoft.Extensions.Configuration;
 using InsaneChat.AI;
-using InsaneChat.AI.Tools.Providers;
+
 using InsaneChat.AI.Tools;
+using ModelContextProtocol.Client;
+
 
 Console.WriteLine(Directory.GetCurrentDirectory());
 var configuration = new ConfigurationBuilder()
@@ -17,6 +19,13 @@ var configuration = new ConfigurationBuilder()
 var serviceProvider = new ServiceCollection()
     .AddSingleton<IConfiguration>(configuration)
     .AddCommands()
+    .AddSingleton<McpClient>(sp =>
+    {
+        return McpClient.CreateAsync(new HttpClientTransport(new HttpClientTransportOptions
+        {
+            Endpoint = new Uri("https://api.microchip.com/mcp/resources"),
+        })).GetAwaiter().GetResult();
+    })
     .AddCoreAI()
     .BuildServiceProvider();
 
@@ -28,6 +37,7 @@ await toolManager.LoadTools();
 Console.WriteLine("Welcome to InsaneChat CLI! Type '/help' for a list of commands.");
 
 var chatSession = serviceProvider.GetRequiredService<ChatSession>();
+
 while (true)
 {
     Console.Write("> ");

@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="ModelContextProtocol" Version="1.1.0" />
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <PackageReference Include="OpenAI" Version="2.9.1" />
   </ItemGroup>

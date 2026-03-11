@@ -48,7 +48,7 @@ public static class CoreAIExtensions
 
         // Register tool providers
         services.AddSingleton<IToolProvider, LocalToolProvider>();
-
+        services.AddSingleton<IToolProvider, MCPToolProvider>();
         return services;
     }
 }
